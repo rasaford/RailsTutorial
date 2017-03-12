@@ -12,3 +12,15 @@
 
 <%= link_to 'Edit', edit_user_path(@user) %> |
 <%= link_to 'Back', users_path %>
+
+<h1>Microposts</h1>
+<table>
+  <tbody>
+    <% @user.microposts.each do |post| %>
+      <tr>
+        <td><%= post.content %></td>
+        <td><%= post.user_id %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
