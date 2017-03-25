@@ -9,46 +9,28 @@ class UsersSignupTest < ActionDispatch::IntegrationTest
     assert_no_difference 'User.count' do
       post users_path, params: {
         user: { name: "",
-                email: "",
-                password: "",
-                password_confirmation: "" } }
+                email: "user@invalid",
+                password: "foo",
+                password_confirmation: "bar" } }
     end
     assert_template 'users/new'
+    # testing for the existance of error messages in the DOM
+    assert_select 'div#error_explanation'
+    assert_select 'div.field_with_errors'
+    # assert_routing({ path: 'signup', method: :post }, { controller: 'users', action: 'create' })
+    assert_select 'form[action="/signup"]'
   end
 
-  test "too short password" do
-    get signup_path
-    assert_no_difference 'User.count' do
-      post users_path, params: {
-        user: { name: "",
-                email: "",
-                password: "123",
-                password_confirmation: "123" } }
+  test 'valid user singnup' do
+    assert_difference 'User.count', 1 do
+      post users_path, params: { user: { name: "Example User",
+                                         email: "user@example.com",
+                                         password: "password",
+                                         password_confimation: "password" } }
     end
-    assert_template 'users/new'
-  end
-
-  test "non matching password" do
-    get signup_path
-    assert_no_difference 'User.count' do
-      post users_path, params: {
-        user: { name: "",
-                email: "",
-                password: "12321",
-                password_confirmation: "asdfas" } }
-    end
-    assert_template 'users/new'
-  end
-
-  test "inavid email" do
-    get signup_path
-    assert_no_difference 'User.count' do
-      post users_path, params: {
-        user: { name: "",
-                email: "invalid@invalid:com",
-                password: "",
-                password_confirmation: "" } }
-    end
-    assert_template 'users/new'
+    follow_redirect!
+    assert_template 'users/show'
+    assert_not flash.empty?
+    assert_select "div.alert-success"
   end
 end
